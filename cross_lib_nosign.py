@@ -9,33 +9,75 @@ def generate_all_boards(elements):
 			boards.append(i)
 	return boards
 
+def test_board(board, row_goals, col_goals, get_solutions=False):
+	if not get_solutions:
+		sign_combinations = ["+-*", "+*-", "-+*", "-*+", "*+-", "*-+"]
+		if test_rows(board, sign_combinations, row_goals):
+			if test_cols(board, sign_combinations, col_goals):
+				return True
+		return False
+	if get_solutions:
+		sign_combinations = ["+-*", "+*-", "-+*", "-*+", "*+-", "*-+"]
+		if test_rows(board, sign_combinations, row_goals):
+			if test_cols(board, sign_combinations, col_goals):
+				return [test_rows(board, sign_combinations, row_goals, get_solutions=True), test_cols(board, sign_combinations, col_goals, get_solutions=True)]
+		return False
 
 
+def print_solution(solution):
+	print()
+	print("Solution: ")
+	print("Rows: ")
+	for row in solution[0]:
+		print(row)
+	print("Columns: ")
+	for col in solution[1]:
+		print(col)
 
-def test_board(board, row_goals, col_goals):
-	sign_combinations = ["+-*", "+*-", "-+*", "-*+", "*+-", "*-+"]
+def test_rows(board, signs, goals, get_solutions=False):
+	if not get_solutions:
+		for index, row in enumerate(board):
+			if not test_line(row, signs, goals[index]): 
+				return False
+		return True
+	if get_solutions:
+		solutions = []
+		for index, row in enumerate(board):
+			if test_line(row, signs, goals[index]):
+				solutions.append(test_line(row,signs,goals[index],get_solutions=True))
+		return solutions
 
-	if test_rows(board, sign_combinations, row_goals):
-		print("Lol")
-		if test_cols(board, sign_combinations, col_goals):
-			return True
 
-def test_rows(board, signs, goals):
-	for index, row in enumerate(board):
-		for comb in signs:
-			string = "{0}{1}{2}{3}{4}{5}{6}".format(row[0], comb[0], row[1], comb[1], row[2], comb[2], row[3])
-			if eval_dhp(string) == goals[index]: 
-	return True
-
-def test_line(line, signs, goal):
+def test_line(line, signs, goal, get_solutions=False):
+	#line = [5, 6, 7, 8]
+	#signs = ["+-*", "-*+"]
+	#goal = 44
+	if not get_solutions:
+		for sign in signs:
+			expr = "{0}{1}{2}{3}{4}{5}{6}".format(line[0], sign[0], line[1], sign[1], line[2], sign[2], line[3])
+			if eval_dhp(expr) == goal:
+				return True
+		return False
+	if get_solutions:
+		for sign in signs:
+			expr = "{0}{1}{2}{3}{4}{5}{6}".format(line[0], sign[0], line[1], sign[1], line[2], sign[2], line[3])
+			if eval_dhp(expr) == goal:
+				return expr
+		return False
 	
 
-def test_cols(board, signs, goals):
-	for index, col in enumerate(list(zip(*board))):
-		for comb in signs:
-			string = "{0}{1}{2}{3}{4}{5}{6}".format(col[0], comb[0], col[1], comb[1], col[2], comb[2], col[3])
-			if eval_dhp(string) == goals[index]:
-	return True
+def test_cols(board, signs, goals, get_solutions=False):
+	if not get_solutions:
+		for index, col in enumerate(list(zip(*board))):
+			if not test_line(col, signs, goals[index]): 
+				return False
+		return True
+	if get_solutions:
+		solutions = []
+		for index, col in enumerate(list(zip(*board))):
+			if test_line(col, signs, goals[index]):
+				solutions.append(test_line(col, signs, goals[index], get_solutions=True))
+		return solutions
 
 def is_valid_board(board):
 	for index_r, row in enumerate(board):
